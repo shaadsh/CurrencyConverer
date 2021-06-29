@@ -1,0 +1,218 @@
+package com.mycompany.myapp.service;
+
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.IMap;
+import com.mycompany.myapp.domain.CurrenciesAPI;
+import com.mycompany.myapp.domain.Currency;
+import com.mycompany.myapp.domain.Rates;
+import com.mycompany.myapp.interfaces.CurrencyInterface;
+import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import javax.money.CurrencyQueryBuilder;
+import javax.money.Monetary;
+import javax.money.MonetaryAmount;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Instant;
+import java.util.Date;
+
+@Service
+public class CurrencyService {
+
+    private static final String ACCESS_KEY = "7d230bbac3ef0c5b4fbf6d8e5b7a42dd";
+
+    CurrencyInterface currencyInterface;
+    HazelcastInstance hazelcastInstance;
+
+    CurrencyService(CurrencyInterface currencyInterface, HazelcastInstance hazelcastInstance){
+        this.currencyInterface=currencyInterface;
+        this.hazelcastInstance= hazelcastInstance;
+    }
+
+    public double getData(Currency currency) throws URISyntaxException {
+
+        String api = "http://api.exchangeratesapi.io/v1/latest?access_key="+ACCESS_KEY;
+        IMap<String,Double> cacheData = hazelcastInstance.getMap("currencyMap");
+        if(CollectionUtils.isEmpty(cacheData)){
+            CurrenciesAPI currenciesAPI = currencyInterface.getCurrencies(new URI(api));
+            prepareCache(currenciesAPI,cacheData);
+        }
+        double money1 = cacheData.get(currency.getSourceCurrency());
+        double money2 =cacheData.get(currency.getTargetCurrency());
+        return money1-money2;
+    }
+
+    private void prepareCache(CurrenciesAPI currenciesAPI,IMap<String,Double> cacheData){
+        Rates rates = currenciesAPI.getRates();
+        cacheData.put("AED",rates.getAed());
+        cacheData.put("AFN",rates.getAfn());
+        cacheData.put("ALL",rates.getAll());
+        cacheData.put("AMD",rates.getAmd());
+        cacheData.put("ANG",rates.getAng());
+        cacheData.put("AOA",rates.getAoa());
+        cacheData.put("ARS",rates.getArs());
+        cacheData.put("AUD",rates.getAud());
+        cacheData.put("AWG",rates.getAwg());
+        cacheData.put("AZN",rates.getAzn());
+        cacheData.put("BAM",rates.getBam());
+        cacheData.put("BBD",rates.getBbd());
+        cacheData.put("BDT",rates.getBdt());
+        cacheData.put("BGN",rates.getBgn());
+        cacheData.put("BHD",rates.getBhd());
+        cacheData.put("BIF",rates.getBif());
+        cacheData.put("BMD",rates.getBmd());
+        cacheData.put("BND",rates.getBnd());
+        cacheData.put("BOB",rates.getBob());
+        cacheData.put("BRL",rates.getBrl());
+        cacheData.put("BSD",rates.getBsd());
+        cacheData.put("BTC",rates.getBtc());
+        cacheData.put("BTN",rates.getBtn());
+        cacheData.put("BWP",rates.getBwp());
+        cacheData.put("BYN",rates.getByn());
+        cacheData.put("BYR",rates.getByr());
+        cacheData.put("BZD",rates.getBzd());
+        cacheData.put("CAD",rates.getCad());
+        cacheData.put("CDF",rates.getCdf());
+        cacheData.put("CHF",rates.getChf());
+        cacheData.put("CLF",rates.getClf());
+        cacheData.put("CLP",rates.getClp());
+        cacheData.put("CNY",rates.getCny());
+        cacheData.put("COP",rates.getCop());
+        cacheData.put("CRC",rates.getCrc());
+        cacheData.put("CUC",rates.getCuc());
+        cacheData.put("CUP",rates.getCup());
+        cacheData.put("CVE",rates.getCve());
+        cacheData.put("CZK",rates.getCzk());
+        cacheData.put("DJF",rates.getDjf());
+        cacheData.put("DKK",rates.getDkk());
+        cacheData.put("DOP",rates.getDop());
+        cacheData.put("DZD",rates.getDzd());
+        cacheData.put("EGP",rates.getEgp());
+        cacheData.put("ERN",rates.getErn());
+        cacheData.put("ETB",rates.getEtb());
+        cacheData.put("EUR",rates.getEur());
+        cacheData.put("FJD",rates.getFjd());
+        cacheData.put("FKP",rates.getFkp());
+        cacheData.put("GBP",rates.getGbp());
+        cacheData.put("GEL",rates.getGel());
+        cacheData.put("GGP",rates.getGgp());
+        cacheData.put("GHS",rates.getGhs());
+        cacheData.put("GIP",rates.getGip());
+        cacheData.put("GMD",rates.getGmd());
+        cacheData.put("GNF",rates.getGnf());
+        cacheData.put("GTQ",rates.getGtq());
+        cacheData.put("GYD",rates.getGyd());
+        cacheData.put("HKD",rates.getHkd());
+        cacheData.put("HNL",rates.getHnl());
+        cacheData.put("HRK",rates.getHrk());
+        cacheData.put("HTG",rates.getHtg());
+        cacheData.put("HUF",rates.getHuf());
+        cacheData.put("IDR",rates.getIdr());
+        cacheData.put("ILS",rates.getIls());
+        cacheData.put("IMP",rates.getImp());
+        cacheData.put("INR",rates.getInr());
+        cacheData.put("IQD",rates.getIqd());
+        cacheData.put("IRR",rates.getIrr());
+        cacheData.put("ISK",rates.getIsk());
+        cacheData.put("JEP",rates.getJep());
+        cacheData.put("JMD",rates.getJmd());
+        cacheData.put("JOD",rates.getJod());
+        cacheData.put("JPY",rates.getJpy());
+        cacheData.put("KES",rates.getKes());
+        cacheData.put("KGS",rates.getKgs());
+        cacheData.put("KHR",rates.getKhr());
+        cacheData.put("KMF",rates.getKmf());
+        cacheData.put("KPW",rates.getKpw());
+        cacheData.put("KRW",rates.getKrw());
+        cacheData.put("KWD",rates.getKwd());
+        cacheData.put("KYD",rates.getKyd());
+        cacheData.put("KZT",rates.getKzt());
+        cacheData.put("LAK",rates.getLak());
+        cacheData.put("LBP",rates.getLbp());
+        cacheData.put("LKR",rates.getLkr());
+        cacheData.put("LRD",rates.getLrd());
+        cacheData.put("LSL",rates.getLsl());
+        cacheData.put("LTL",rates.getLtl());
+        cacheData.put("LVL",rates.getLvl());
+        cacheData.put("LYD",rates.getLyd());
+        cacheData.put("MAD",rates.getMad());
+        cacheData.put("MDL",rates.getMdl());
+        cacheData.put("MGA",rates.getMga());
+        cacheData.put("MKD",rates.getMkd());
+        cacheData.put("MMK",rates.getMmk());
+        cacheData.put("MNT",rates.getMnt());
+        cacheData.put("MOP",rates.getMop());
+        cacheData.put("MRO",rates.getMro());
+        cacheData.put("MUR",rates.getMur());
+        cacheData.put("MVR",rates.getMvr());
+        cacheData.put("MWK",rates.getMwk());
+        cacheData.put("MXN",rates.getMxn());
+        cacheData.put("MYR",rates.getMyr());
+        cacheData.put("MZN",rates.getMzn());
+        cacheData.put("NAD",rates.getNad());
+        cacheData.put("NGN",rates.getNgn());
+        cacheData.put("NIO",rates.getNio());
+        cacheData.put("NOK",rates.getNok());
+        cacheData.put("NPR",rates.getNpr());
+        cacheData.put("NZD",rates.getNzd());
+        cacheData.put("OMR",rates.getOmr());
+        cacheData.put("PAB",rates.getPab());
+        cacheData.put("PEN",rates.getPen());
+        cacheData.put("PGK",rates.getPgk());
+        cacheData.put("PHP",rates.getPhp());
+        cacheData.put("PKR",rates.getPkr());
+        cacheData.put("PLN",rates.getPln());
+        cacheData.put("PYG",rates.getPyg());
+        cacheData.put("QAR",rates.getQar());
+        cacheData.put("RON",rates.getRon());
+        cacheData.put("RSD",rates.getRsd());
+        cacheData.put("RUB",rates.getRub());
+        cacheData.put("RWF",rates.getRwf());
+        cacheData.put("SAR",rates.getSar());
+        cacheData.put("SBD",rates.getSbd());
+        cacheData.put("SCR",rates.getScr());
+        cacheData.put("SDG",rates.getSdg());
+        cacheData.put("SEK",rates.getSek());
+        cacheData.put("SGD",rates.getSgd());
+        cacheData.put("SHP",rates.getShp());
+        cacheData.put("SLL",rates.getSll());
+        cacheData.put("SOS",rates.getSos());
+        cacheData.put("SRD",rates.getSrd());
+        cacheData.put("STD",rates.getStd());
+        cacheData.put("SVC",rates.getSvc());
+        cacheData.put("SYP",rates.getSyp());
+        cacheData.put("SZL",rates.getSzl());
+        cacheData.put("THB",rates.getThb());
+        cacheData.put("TJS",rates.getTjs());
+        cacheData.put("TMT",rates.getTmt());
+        cacheData.put("TND",rates.getTnd());
+        cacheData.put("TOP",rates.getTop());
+        cacheData.put("TRY",rates.getTry());
+        cacheData.put("TTD",rates.getTtd());
+        cacheData.put("TWD",rates.getTwd());
+        cacheData.put("TZS",rates.getTzs());
+        cacheData.put("UAH",rates.getUah());
+        cacheData.put("UGX",rates.getUgx());
+        cacheData.put("USD",rates.getUsd());
+        cacheData.put("UYU",rates.getUyu());
+        cacheData.put("UZS",rates.getUzs());
+        cacheData.put("VEF",rates.getVef());
+        cacheData.put("VND",rates.getVnd());
+        cacheData.put("VUV",rates.getVuv());
+        cacheData.put("WST",rates.getWst());
+        cacheData.put("XAF",rates.getXaf());
+        cacheData.put("XAG",rates.getXag());
+        cacheData.put("XAU",rates.getXau());
+        cacheData.put("XCD",rates.getXcd());
+        cacheData.put("XDR",rates.getXdr());
+        cacheData.put("XOF",rates.getXof());
+        cacheData.put("XPF",rates.getXpf());
+        cacheData.put("YER",rates.getYer());
+        cacheData.put("ZAR",rates.getZar());
+        cacheData.put("ZMK",rates.getZmk());
+        cacheData.put("ZMW",rates.getZmw());
+        cacheData.put("ZWL",rates.getZwl());
+    }
+}

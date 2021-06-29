@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  currencyconverter-hazelcast-management-center:
+    image: hazelcast/management-center:4.2021.03-1
+    ports:
+      - 127.0.0.1:8180:8080
